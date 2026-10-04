@@ -1,0 +1,9 @@
+.firebaserc
+functions/venv/
+functions/.env
+functions/.env.*
+!functions/.env.example
+__pycache__/
+.pytest_cache/
+*.pyc
+firebase-debug.log

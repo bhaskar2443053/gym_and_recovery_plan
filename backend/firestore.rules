@@ -1,0 +1,41 @@
+rules_version = '2';
+
+// Users can only read/write under users/{their uid}.
+// On set docs, the analysis fields are written only by the Cloud Function
+// (Admin SDK bypasses rules), never by clients.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    function serverFields() {
+      return ['status', 'error', 'analyzedAt', 'analysis'];
+    }
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /sessions/{sessionId} {
+        allow read, write: if isOwner(uid);
+
+        match /sets/{setId} {
+          allow read, delete: if isOwner(uid);
+          allow create: if isOwner(uid)
+            && !request.resource.data.keys().hasAny(serverFields());
+          allow update: if isOwner(uid)
+            && !request.resource.data.diff(resource.data).affectedKeys().hasAny(serverFields());
+        }
+
+        // Any other subcollection of a session.
+        match /{sub}/{rest=**} {
+          allow read, write: if isOwner(uid) && sub != 'sets';
+        }
+      }
+
+      // Any other subcollection of the user (profile data, plans, ...).
+      match /{coll}/{rest=**} {
+        allow read, write: if isOwner(uid) && coll != 'sessions';
+      }
+    }
+  }
+}
