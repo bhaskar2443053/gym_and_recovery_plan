@@ -204,7 +204,8 @@ final class LiveRepCounter {
             let dot = v1.dx * v2.dx + v1.dy * v2.dy
             let mag = hypot(v1.dx, v1.dy) * hypot(v2.dx, v2.dy)
             guard mag > 0 else { return nil }
-            return acos(max(-1, min(1, dot / mag))) * 180 / .pi
+            let cosine = Swift.max(-1.0, Swift.min(1.0, Double(dot / mag)))
+            return Foundation.acos(cosine) * 180 / Double.pi
         }
         func either(_ l: (J, J, J), _ r: (J, J, J)) -> Double? {
             angle(l.0, l.1, l.2) ?? angle(r.0, r.1, r.2)
