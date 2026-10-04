@@ -1,0 +1,24 @@
+rules_version = '2';
+
+// Set videos: videos/{uid}/{sessionId}/{setId}.mov|.mp4
+// Only the signed-in owner can upload, read or delete their own videos.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /videos/{uid}/{sessionId}/{fileName} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && fileName.matches('^[^/]+[.](mov|MOV|mp4|MP4)$')
+        && request.resource.size < 500 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*');
+    }
+
+    // Everything else is closed.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

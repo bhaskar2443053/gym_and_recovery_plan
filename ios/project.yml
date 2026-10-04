@@ -1,0 +1,97 @@
+name: Forge
+options:
+  bundleIdPrefix: com.forge
+  deploymentTarget:
+    iOS: "17.0"
+    watchOS: "10.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: ""
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: "11.0.0"
+targets:
+  Forge:
+    type: application
+    platform: iOS
+    sources:
+      - path: Forge
+      - path: Shared
+    dependencies:
+      - target: ForgeWatch
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
+      - package: Firebase
+        product: FirebaseStorage
+      - sdk: HealthKit.framework
+    entitlements:
+      path: Forge/Resources/Forge.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+    info:
+      path: Forge/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Forge
+        UILaunchScreen: {}
+        UIUserInterfaceStyle: Dark
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSCameraUsageDescription: Forge records each set so it can count reps and check your form.
+        NSMicrophoneUsageDescription: Forge records audio with your set videos so you can hear cues on playback.
+        NSHealthShareUsageDescription: Forge reads heart rate, HRV, sleep and resting heart rate to plan training and recovery.
+        NSHealthUpdateUsageDescription: Forge saves your strength workouts to the Health app.
+        UIBackgroundModes: [fetch, processing]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.forge.app
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+  ForgeWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: ForgeWatch
+      - path: Shared
+    dependencies:
+      - sdk: HealthKit.framework
+    entitlements:
+      path: ForgeWatch/ForgeWatch.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+    info:
+      path: ForgeWatch/Info.plist
+      properties:
+        CFBundleDisplayName: Forge
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: com.forge.app
+        NSHealthShareUsageDescription: Forge reads your heart rate during workouts.
+        NSHealthUpdateUsageDescription: Forge saves your strength workouts to the Health app.
+        WKBackgroundModes: [workout-processing]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.forge.app.watchkitapp
+  ForgeTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ForgeTests
+    dependencies:
+      - target: Forge
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Forge:
+    build:
+      targets:
+        Forge: all
+        ForgeTests: [test]
+    test:
+      targets:
+        - ForgeTests
